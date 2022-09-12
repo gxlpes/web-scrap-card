@@ -8,14 +8,25 @@ app.get("/", async (req, res) => {
   await page.goto("https://pra.ufpr.br/ru/cardapio-ru-jardim-botanico/");
 
   const pageData = await page.evaluate(() => {
+    const rows = Array.from(document.querySelectorAll("td"), (td) => td.innerHTML).slice(0, 6);
+
+    const oddOnes = [],
+      evenOnes = [];
+    for (let i = 0; i < rows.length; i++) (i % 2 == 0 ? evenOnes : oddOnes).push(rows[i]);
+
+    // const infoMealsContent = infoMealsTd.map((content = content.innerText));
+
     return {
-      data: Array.from(document.querySelectorAll("tr"), (tr) => tr.innerText).slice(0, 6),
+      dataHeaders: evenOnes,
+      dataMeals: oddOnes,
     };
   });
+
   await browser.close();
 
   res.send({
-    table: pageData.data,
+    headers: pageData.dataHeaders,
+    meals: pageData.dataMeals,
   });
 });
 
